@@ -1,7 +1,11 @@
 AC_INIT([await], [1.0])
-AM_INIT_AUTOMAKE([1.10 -Wall no-define])
+AM_INIT_AUTOMAKE([-Wall -Werror])
+
 AC_CONFIG_HEADERS([config.h])
 AM_PROG_CC_C_O
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS([fcntl.h])
 AC_CONFIG_FILES([
   Makefile
   src/Makefile
