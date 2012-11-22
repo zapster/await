@@ -1,6 +1,6 @@
 AC_INIT([await], [1.0])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([-Wall -Werror])
+AM_INIT_AUTOMAKE([-Wall -Werror -Wsyntax parallel-tests])
 
 AC_CONFIG_HEADERS([config.h])
 AM_PROG_CC_C_O
@@ -21,6 +21,7 @@ AC_CHECK_FUNCS([strerror])
 AC_CONFIG_FILES([
   Makefile
   src/Makefile
+  tests/Makefile
 ])
 AC_SEARCH_LIBS([sem_open], [rt pthread], [], [AC_MSG_ERROR([No pthread library is available])])
 
