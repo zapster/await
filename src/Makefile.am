@@ -6,6 +6,7 @@ AM_CFLAGS = -g3 -O0
 AM_CXXFLAGS = -g3 -O0
 endif
 
+bin_PROGRAMS = await await-del
+await_SOURCES = await.c
 
-bin_PROGRAMS = await
-await_SOURCES = main.c
+await_del_SOURCES = await-del.c
