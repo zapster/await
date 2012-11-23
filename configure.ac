@@ -23,7 +23,12 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror -Wsyntax parallel-tests])
 
 AC_CONFIG_HEADERS([config.h])
+
+# ugly hack because i do not want -g -O2 by default
+# should check if CFLAGS is empty
+CFLAGS_ORIG=${CFLAGS}
 AM_PROG_CC_C_O
+CFLAGS=${CFLAGS_ORIG}
 
 # Checks for header files.
 AC_HEADER_STDC
