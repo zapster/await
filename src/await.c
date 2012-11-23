@@ -31,15 +31,20 @@
 #include <sys/stat.h>        /* For mode constants */
 #include <semaphore.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 #define SEM_MODE S_IRWXU     /* read, write, execute/search by owner */
 #define SEM_VALUE 1
 
-#ifndef NDEBUG
+#ifdef NDEBUG
+  #define DBG(...)
+#else
   #define DBG(...) \
     fprintf (stderr, "%s:%d: ", __FILE__, __LINE__); \
     fprintf (stderr, __VA_ARGS__)
-#else
-  #define DBG(...)
 #endif
 
 const char* arg0 = NULL;

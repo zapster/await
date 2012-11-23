@@ -26,6 +26,10 @@
 
 #include <semaphore.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 const char* arg0 = NULL;
 
 inline static void usage()
