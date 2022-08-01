@@ -19,34 +19,62 @@
 
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <string.h>
-#include <signal.h>
+#include "await.h"
+#include <mqueue.h>
 
-#include <fcntl.h>           /* For O_* constants */
-#include <sys/stat.h>        /* For mode constants */
-#include <semaphore.h>
+static struct mq_attr get_mq_attr() {
+  struct mq_attr attr;
+  attr.mq_msgsize = sizeof(pid_t);
+  attr.mq_maxmsg = 10;
+  return attr;
+}
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+static const char *get_mq_name(int argc, const char *argv[]) {
+  const char *mqname = "/await-pid-queue";
+  return mqname;
+}
 
 
-#define SEM_MODE S_IRWXU     /* read, write, execute/search by owner */
-#define SEM_VALUE 1
+static mqd_t open_queue(int argc, const char *argv[], const int oflag) {
+  mqd_t mqdes;
+  const char *mqname = get_mq_name(argc, argv);
+  struct mq_attr attr = get_mq_attr();
 
-#ifdef NDEBUG
-  #define DBG(...)
-#else
-  #define DBG(...) \
-    fprintf (stderr, "%s:%d: ", __FILE__, __LINE__); \
-    fprintf (stderr, __VA_ARGS__)
-#endif
+  mqdes = mq_open(mqname, oflag, S_IRUSR | S_IWUSR, &attr);
+  if (mqdes == (mqd_t) -1) {
+    perror("mq_open");
+  }
+  return mqdes;
+}
 
+void push_pid(int argc, const char *argv[], pid_t *pid) {
+  mqd_t mqdes = open_queue(argc, argv, O_CREAT | O_WRONLY);
+
+  if (mq_send(mqdes, (const char *) pid, sizeof(pid_t), PUSH_PRIORITY) != 0) {
+    perror("mq_send");
+  }
+}
+
+void pop_pid(int argc, const char *argv[]) {
+  mqd_t mqdes = open_queue(argc, argv, O_CREAT | O_WRONLY);
+
+  pid_t pid = 0;
+  if (mq_send(mqdes, (const char *) &pid, sizeof(pid_t), POP_PRIORITY) != 0) {
+    perror("mq_send");
+  }
+}
+
+pid_t receive_msg(int argc, const char *argv[], unsigned int *rvprio) {
+  mqd_t mqdes = open_queue(argc, argv, O_CREAT | O_RDONLY);
+  // read PID
+  pid_t pid;
+  if (mq_receive(mqdes, (char *) &pid, sizeof(pid_t), rvprio) == -1) {
+    perror("mq_receive");
+  }
+  return pid;
+}
+
+#if 0
 const char* arg0 = NULL;
 pid_t pid = 0;
 
@@ -178,3 +206,4 @@ int main(int argc, char * argv[])
 
   return WEXITSTATUS(status);
 }
+#endif
